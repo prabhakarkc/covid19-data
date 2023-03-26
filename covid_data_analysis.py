@@ -32,16 +32,17 @@ def save_to_excel_usa_covid_vaccination_data(data):
 save_to_excel_usa_covid_data(usa_states_data)
 save_to_excel_usa_covid_vaccination_data(usa_vaccination_data)
 
-# Filter covid data
 def read_usa_covid_data(file_path):
     df = pd.read_excel(file_path, engine='openpyxl')
     columns_to_keep = [
-        'state', 'positive', 'negative', 'pending', 'totalTestResults',
-        'hospitalizedCurrently', 'hospitalizedCumulative', 'onVentilatorCurrently',
+        'state', 'positive', 'negative', 'pending', 'hospitalizedCumulative',
         'onVentilatorCumulative', 'recovered', 'death', 'date'
     ]
     df = df[columns_to_keep]
     df['date'] = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%d')  # Format the date column
+
+    # Rename columns
+    df = df.rename(columns={'hospitalizedCumulative': 'hospitalized', 'onVentilatorCumulative': 'onVentilator'})
 
     # Keep only one unique value in the state column with the date 2021-03-07
     df = df[df['date'] == '2021-03-07']
