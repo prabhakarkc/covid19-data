@@ -37,17 +37,10 @@ pip install pandas requests openpyxl matplotlib seaborn
 
 - Install the required dependencies using the following command:
    pip install pandas requests openpyxl matplotlib seaborn
-<<<<<<< HEAD
 - Run the Python script using the following command (must run them in sequence since covid_data_visualization.py is dependent on excel file generated using covid_data_analysis.py):
    1. python covid_data_analysis.py
    2. python covid_data_visualization.py
 - The script will fetch data, process it, and save the results in Excel files in the same directory. It will also generate the visualizations and save them as .png files.
-=======
-2. Run the Python script using the following command (must run them in sequence since covid_data_visualization.py is dependent on excel file generated using covid_data_analysis.py):
-   i. python covid_data_analysis.py
-   ii. python covid_data_visualization.py
-3. The script will fetch data, process it, and save the results in Excel files in the same directory. It will also generate the visualizations and save them as .png files.
->>>>>>> 7f58b7e3b120faa796a90877da37eccc7728d820
 
 ## Output Files
 
