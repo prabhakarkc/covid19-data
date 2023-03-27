@@ -30,12 +30,16 @@ The data used in this project comes from the following sources:
 - matplotlib
 - seaborn
 
+You can install all dependencies using:
+pip install pandas requests openpyxl matplotlib seaborn
+
 ## Usage
 
 1. Install the required dependencies using the following command:
    pip install pandas requests openpyxl matplotlib seaborn
-2. Run the Python script using the following command:
-   python covid_data_analysis.py
+2. Run the Python script using the following command (must run them in sequence since covid_data_visualization.py is dependent on excel file generated using covid_data_analysis.py):
+   i. python covid_data_analysis.py
+   ii. python covid_data_visualization.py
 3. The script will fetch data, process it, and save the results in Excel files in the same directory. It will also generate the visualizations and save them as .png files.
 
 ## Output Files
