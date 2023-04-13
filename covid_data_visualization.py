@@ -1,5 +1,6 @@
-import pandas as pd
 import matplotlib.pyplot as plt
+import pandas as pd
+import matplotlib.dates as mdates
 import seaborn as sns
 from matplotlib.patches import Patch
 
@@ -7,56 +8,87 @@ from matplotlib.patches import Patch
 sns.set_style("whitegrid")
 
 def plot_vaccination_and_covid_cases(data):
-    # Sort data by the number of people vaccinated
-    data = data.sort_values(by='peopleVaccinated', ascending=False)
+    # Convert 'date' column to datetime with desired format
+    data['date'] = pd.to_datetime(data['date'], format='%Y-%m-%d')
+
+    # Filter data for the specified date range
+    date_range = pd.date_range(start='2021-01-12', end='2021-03-07')
+    filtered_data = data[data['date'].isin(date_range)]
+    print(filtered_data.head())
+    if filtered_data.empty:
+        print("No data available for the specified date range.")
+        return
 
     # Set color palette
-    colors = ['#4c72b0', '#c44e52', '#55a868']
+    colors = sns.color_palette("Greys", n_colors=9)
 
-    # Create a bar chart for the number of people vaccinated, positive cases, and negative cases
+    # Create a scatter plot for the number of people vaccinated and COVID-19 cases
     plt.figure(figsize=(16, 6))
-    sns.barplot(data=data, x='state', y='peopleVaccinated', color=colors[0], alpha=0.8)
-    sns.barplot(data=data, x='state', y='positive', color=colors[1], alpha=0.8)
-    sns.barplot(data=data, x='state', y='negative', color=colors[2], alpha=0.8)
-    plt.title("Number of People Vaccinated and COVID-19 Cases in each state as of 2021-03-07")
+    plt.scatter(filtered_data['date'], filtered_data['peopleVaccinated'], color=colors[0], alpha=0.8)
+    plt.scatter(filtered_data['date'], filtered_data['positive'], color=colors[1], alpha=0.8)
+    plt.scatter(filtered_data['date'], filtered_data['negative'], color=colors[2], alpha=0.8)
+    plt.title("Number of People Vaccinated and COVID-19 Cases between date 01/12/2021 and 03/07/2021")
     plt.ylabel("Number of People Vaccinated and COVID Cases")
-    plt.xlabel("State")
-    plt.legend(['People Vaccinated', 'Positive Cases', 'Negative Cases'])
-    plt.tick_params(axis='x', labelrotation=90, labelsize=10)
+    plt.xlabel("Date")
+
+    # Set x-axis ticks and format labels as mm-dd
+    plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=7))
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
+
     # Add legend color patches
     legend_handles = [Patch(facecolor=colors[i], label=lab) for i, lab in
                       enumerate(['People Vaccinated', 'Positive Cases', 'Negative Cases'])]
     plt.legend(handles=legend_handles)
+
+    plt.tick_params(axis='x', labelrotation=90, labelsize=10)
     plt.tight_layout()
-    plt.savefig("people_vaccinated_and_covid_cases_in_each_state.png", dpi=300, bbox_inches='tight')
+    plt.savefig("1_people_vaccinated_and_covid_cases_vs_date.png", dpi=300, bbox_inches='tight')
     plt.close()
-    print("people_vaccinated_and_covid_cases_in_each_state.png saved.")
+    print("1_people_vaccinated_and_covid_cases_by_date.png saved.")
 
 def plot_total_cases(data):
-    # Calculate the total number of cases
-    total_negative = data['negative'].sum()
-    total_positive = data['positive'].sum()
-    total_pending = data['pending'].sum()
-    total_hospitalized = data['hospitalized'].sum()
-    total_onVentilator = data['onVentilator'].sum()
-    total_recovered = data['recovered'].sum()
-    total_deaths = data['death'].sum()
+    # Filter data for the specified date
+    data = data[data['date'] == '2021-03-07']
+
+    # Set color palette
+    colors = sns.color_palette("Greys", n_colors=9)
 
     # Create pie charts for the total number of cases
-    fig, axs = plt.subplots(2, 2, figsize=(16, 16))
-    axs[0, 0].pie([total_negative, total_positive, total_pending], labels=['Negative', 'Positive', 'Pending'], autopct='%1.1f%%', startangle=90, colors=['#55a868', '#c44e52', '#4c72b0'])
-    axs[0, 0].set_title('COVID-19 Cases')
-    axs[0, 1].pie([total_hospitalized, total_onVentilator, total_recovered, total_deaths], labels=['Hospitalized', 'On Ventilator', 'Recovered', 'Deaths'], autopct='%1.1f%%', startangle=90, colors=['#4c72b0', '#55a868', '#f6c85f', '#c44e52'])
-    axs[0, 1].set_title('COVID-19 Outcomes')
-    axs[1, 0].remove()
-    axs[1, 1].remove()
-    plt.savefig("total_cases_combined.png", dpi=300, bbox_inches='tight')
+    fig, axs = plt.subplots(1, 2, figsize=(16, 8))
+
+    # Convert series objects to float before formatting
+    positive_percent = float(data['positive']) * 100 / (float(data['positive']) + float(data['negative']) + float(data['pending']))
+    negative_percent = float(data['negative']) * 100 / (float(data['positive']) + float(data['negative']) + float(data['pending']))
+    pending_percent = float(data['pending']) * 100 / (float(data['positive']) + float(data['negative']) + float(data['pending']))
+    hospitalized_percent = float(data['hospitalized']) * 100 / (float(data['hospitalized']) + float(data['death']) + float(data['recovered']))
+    death_percent = float(data['death']) * 100 / (float(data['hospitalized']) + float(data['death']) + float(data['recovered']))
+    recovered_percent = float(data['recovered']) * 100 / (float(data['hospitalized']) + float(data['death']) + float(data['recovered']))
+
+    axs[0].pie(data[['positive', 'negative', 'pending']].values[0].tolist(),
+               labels=[
+                   f"Positive\n({positive_percent:.1f}%)",
+                   f"Negative\n({negative_percent:.1f}%)",
+                   f"Pending\n({pending_percent:.1f}%)"],
+               autopct='',
+               startangle=90, colors=colors[3:6], pctdistance=0.7, textprops={'fontsize': 10}, radius=1)
+    axs[0].set_title('COVID-19 Cases')
+
+    axs[1].pie(data[['hospitalized', 'death', 'recovered']].values[0].tolist(),
+               labels=[
+                   f"Hospitalized\n({hospitalized_percent:.1f}%)",
+                   f"Deaths\n({death_percent:.1f}%)",
+                   f"Recovered\n({recovered_percent:.1f}%)"],
+               autopct='',
+               startangle=90, colors=colors[3:6], pctdistance=0.7, textprops={'fontsize': 10})
+    axs[1].set_title('COVID-19 Outcomes')
+
+    plt.savefig("2_cumulative_covid_cases.png", dpi=300, bbox_inches='tight')
     plt.close()
-    print("total_cases_combined.png saved.")
+    print("2_cumulative_covid_cases.png saved.")
 
 if __name__ == "__main__":
     # Read the merged data from the Excel file
-    merged_data = pd.read_excel("merged_usa_covid+vaccination_data.xlsx", engine='openpyxl')
+    merged_data = pd.read_excel("7_summary_usa_covid+vaccination_data.xlsx", engine='openpyxl')
 
     # Call the visualization functions
     plot_vaccination_and_covid_cases(merged_data)

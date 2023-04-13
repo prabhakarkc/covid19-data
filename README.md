@@ -13,12 +13,13 @@ The data used in this project comes from the following sources:
 
 - Fetch COVID-19 and vaccination data from external sources
 - Filter and clean the data to keep relevant columns and rows
-- Merge the COVID-19 and vaccination datasets based on the 'state' and 'date' columns
+- Combine all states data based on date
+- Merge the COVID-19 and vaccination datasets for given dates
 - Save raw, filtered, cleaned, and merged datasets as Excel files
 
 ## Visualizations
 
-- A bar chart showing the number of people vaccinated, positive cases, and negative cases in each state
+- A scatter plot showing the relationship between the number of people vaccinated, negative and positive cases over time
 - A set of pie charts showing the distribution of total COVID-19 cases and outcomes
 
 ## Dependencies
@@ -35,27 +36,28 @@ pip install pandas requests openpyxl matplotlib seaborn
 
 ## Usage
 
+- Clone or download the project from GitHub.
 - Install the required dependencies using the following command:
-   pip install pandas requests openpyxl matplotlib seaborn
-<<<<<<< HEAD
+   - pip install pandas requests openpyxl matplotlib seaborn
+- Open the project in PyCharm.
+- Open the file covid_data_analysis.py and run the script to fetch data, process it, and save the results in Excel files in the same directory.
+- Open the file covid_data_visualization.py and run the script to generate the visualizations and save them as .png files.
+
+Command line:
 - Run the Python script using the following command (must run them in sequence since covid_data_visualization.py is dependent on excel file generated using covid_data_analysis.py):
-   1. python covid_data_analysis.py
-   2. python covid_data_visualization.py
-- The script will fetch data, process it, and save the results in Excel files in the same directory. It will also generate the visualizations and save them as .png files.
-=======
-2. Run the Python script using the following command (must run them in sequence since covid_data_visualization.py is dependent on excel file generated using covid_data_analysis.py):
-   i. python covid_data_analysis.py
-   ii. python covid_data_visualization.py
-3. The script will fetch data, process it, and save the results in Excel files in the same directory. It will also generate the visualizations and save them as .png files.
->>>>>>> 7f58b7e3b120faa796a90877da37eccc7728d820
+- python covid_data_analysis.py
+- python covid_data_visualization.py
+
+The output files will be saved in the same directory.
 
 ## Output Files
 
-- usa_covid_data.xlsx: Raw USA COVID-19 data
-- usa_covid_vaccination_data.xlsx: Raw USA vaccination data
-- filtered_usa_covid_data.xlsx: Filtered USA COVID-19 data
-- filtered_usa_covid_vaccination_data.xlsx: Filtered USA vaccination data
-- cleaned_up_filtered_usa_covid_vaccination_data.xlsx: Cleaned up filtered USA vaccination data
-- merged_usa_covid+vaccination_data.xlsx: Merged USA COVID-19 and vaccination data
-- people_vaccinated_and_covid_cases_in_each_state.png: A bar chart showing the number of people vaccinated, positive cases, and negative cases in each state
-- total_cases_combined.png: A set of pie charts showing the distribution of total COVID-19 cases and outcomes
+- 1_usa_covid_data.xlsx: Raw USA COVID-19 data
+- 2_usa_covid_vaccination_data.xlsx: Raw USA vaccination data
+- 3_filtered_usa_covid_data.xlsx: Filtered USA COVID-19 data
+- 4_filtered_usa_covid_vaccination_data.xlsx: Filtered USA vaccination data
+- 5_cleaned_up_filtered_usa_covid_vaccination_data.xlsx: Cleaned up filtered USA vaccination data
+- 6_merged_usa_covid+vaccination_data.xlsx: Merged USA COVID-19 and vaccination data
+- 7_summary_usa_covid+vaccination_data.xlsx: Summary of USA COVID-19 and vaccination data
+- 1_people_vaccinated_and_covid_cases_vs_date.png: A scattered plot showing the number of people vaccinated, positive cases, and negative cases all state combined
+- 2_cumulative_covid_cases.png: A set of pie charts showing the distribution of total COVID-19 cases and outcomes

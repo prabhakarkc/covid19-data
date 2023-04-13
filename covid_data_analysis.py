@@ -1,5 +1,5 @@
-import requests
 import pandas as pd
+import requests
 
 # Fetch covid data
 def fetch_usa_states_data():
@@ -22,12 +22,12 @@ usa_vaccination_data = fetch_usa_vaccination_data()
 def save_to_excel_usa_covid_data(data):
     df = pd.DataFrame(data)
     df['date'] = pd.to_datetime(df['date'], format='%Y%m%d')
-    df.to_excel("usa_covid_data.xlsx", index=False, engine='openpyxl')
-    print("USA states COVID-19 data has been saved to usa_covid_data.xlsx")
+    df.to_excel("1_usa_covid_data.xlsx", index=False, engine='openpyxl')
+    print("USA states COVID-19 data has been saved to 1_usa_covid_data.xlsx")
 
 def save_to_excel_usa_covid_vaccination_data(data):
-    data.to_excel("usa_covid_vaccination_data.xlsx", index=False, engine='openpyxl')
-    print("USA vaccination data has been saved to usa_covid_vaccination_data.xlsx")
+    data.to_excel("2_usa_covid_vaccination_data.xlsx", index=False, engine='openpyxl')
+    print("USA vaccination data has been saved to 2_usa_covid_vaccination_data.xlsx")
 
 save_to_excel_usa_covid_data(usa_states_data)
 save_to_excel_usa_covid_vaccination_data(usa_vaccination_data)
@@ -44,8 +44,8 @@ def read_usa_covid_data(file_path):
     # Rename columns
     df = df.rename(columns={'hospitalizedCumulative': 'hospitalized', 'onVentilatorCumulative': 'onVentilator'})
 
-    # Keep only one unique value in the state column with the date 2021-03-07
-    df = df[df['date'] == '2021-03-07']
+    # Keep only data from 2021-01-12 to 2021-03-07
+    df = df[(df['date'] >= '2021-01-12') & (df['date'] <= '2021-03-07')]
 
     # Keep only valid states using state_map
     state_map = {
@@ -64,22 +64,22 @@ def filter_usa_vaccination_data(data):
     filtered_data = data[columns_to_keep]
     filtered_data = filtered_data.rename(columns={'people_vaccinated': 'peopleVaccinated'})  # Rename the column
 
-    # Keep only one unique value in the state column with the date 2021-03-07
-    filtered_data = filtered_data[filtered_data['date'] == '2021-03-07']
+    # Keep only data from 2021-01-12 to 2021-03-07
+    filtered_data = filtered_data[(filtered_data['date'] >= '2021-01-12') & (filtered_data['date'] <= '2021-03-07')]
 
     return filtered_data
 
-usa_covid_data = read_usa_covid_data("usa_covid_data.xlsx")
+usa_covid_data = read_usa_covid_data("1_usa_covid_data.xlsx")
 filtered_usa_covid_vaccination_data = filter_usa_vaccination_data(usa_vaccination_data)
 
 # Save filtered data to Excel files
 def save_filtered_to_excel_usa_covid(filtered_data):
-    filtered_data.to_excel("filtered_usa_covid_data.xlsx", index=False, engine='openpyxl')
-    print("Filtered USA states COVID-19 data has been saved to filtered_usa_covid_data.xlsx")
+    filtered_data.to_excel("3_filtered_usa_covid_data.xlsx", index=False, engine='openpyxl')
+    print("Filtered USA states COVID-19 data has been saved to 3_filtered_usa_covid_data.xlsx")
 
 def save_filtered_to_excel_usa_covid_vaccination_data(filtered_data):
-    filtered_data.to_excel("filtered_usa_covid_vaccination_data.xlsx", index=False, engine='openpyxl')
-    print("Filtered USA vaccination data has been saved to filtered_usa_covid_vaccination_data.xlsx")
+    filtered_data.to_excel("4_filtered_usa_covid_vaccination_data.xlsx", index=False, engine='openpyxl')
+    print("Filtered USA vaccination data has been saved to 4_filtered_usa_covid_vaccination_data.xlsx")
 
 save_filtered_to_excel_usa_covid(usa_covid_data)
 save_filtered_to_excel_usa_covid_vaccination_data(filtered_usa_covid_vaccination_data)
@@ -119,9 +119,9 @@ cleaned_usa_covid_data, cleaned_filtered_usa_covid_vaccination_data = clean_up_f
 
 # Save cleaned up filtered vaccination data to Excel file
 def save_cleaned_up_filtered_to_excel_usa_covid_vaccination_data(filtered_data):
-    filtered_data.to_excel("cleaned_up_filtered_usa_covid_vaccination_data.xlsx", index=False, engine='openpyxl')
+    filtered_data.to_excel("5_cleaned_up_filtered_usa_covid_vaccination_data.xlsx", index=False, engine='openpyxl')
     print(
-        "Cleaned up filtered USA vaccination data has been saved to cleaned_up_filtered_usa_covid_vaccination_data.xlsx")
+        "Cleaned up filtered USA vaccination data has been saved to 5_cleaned_up_filtered_usa_covid_vaccination_data.xlsx")
 
 save_cleaned_up_filtered_to_excel_usa_covid_vaccination_data(cleaned_filtered_usa_covid_vaccination_data)
 
@@ -130,14 +130,55 @@ print(cleaned_usa_covid_data.head())
 print(cleaned_filtered_usa_covid_vaccination_data.head())
 
 # Merge covid and vaccination data
-merged_data = pd.merge(cleaned_usa_covid_data, cleaned_filtered_usa_covid_vaccination_data, how='inner', on=['state', 'date'])
+merged_data = pd.merge(cleaned_usa_covid_data, cleaned_filtered_usa_covid_vaccination_data, how='inner',
+                       on=['state', 'date'])
 
 # Save merged data to Excel file
 def save_to_excel_merged_usa_covid_vaccination_data(data):
-    data.to_excel("merged_usa_covid+vaccination_data.xlsx", index=False, engine='openpyxl')
-    print("Merged USA COVID-19 and vaccination data has been saved to merged_usa_covid+vaccination_data.xlsx")
+    data.to_excel("6_merged_usa_covid+vaccination_data.xlsx", index=False, engine='openpyxl')
+    print("Merged USA COVID-19 and vaccination data has been saved to 6_merged_usa_covid+vaccination_data.xlsx")
 
 save_to_excel_merged_usa_covid_vaccination_data(merged_data)
 
 # Print merged data
 print(merged_data.head())
+
+def merge_and_summarize_data(merged_data_path):
+    merged_data = pd.read_excel(merged_data_path, engine='openpyxl')
+    unique_dates = merged_data['date'].unique()
+    unique_dates.sort()  # Sort unique_dates in ascending order
+
+    summary_data = []
+    for date in unique_dates:
+        daily_data = merged_data[merged_data['date'] == date]
+        daily_summary = {
+            'date': date,
+            'positive': daily_data['positive'].sum(),
+            'negative': daily_data['negative'].sum(),
+            'pending': daily_data['pending'].sum(),
+            'hospitalized': daily_data['hospitalized'].sum(),
+            'onVentilator': daily_data['onVentilator'].sum(),
+            'recovered': daily_data['recovered'].sum(),
+            'death': daily_data['death'].sum(),
+            'peopleVaccinated': daily_data['peopleVaccinated'].sum()
+        }
+        summary_data.append(daily_summary)
+
+    # Convert summary_data to DataFrame
+    summary_data_df = pd.DataFrame(summary_data)
+
+    # Replace NaN values with 0
+    summary_data_df.fillna(0, inplace=True)
+
+    # Save summary data to Excel file
+    def save_to_excel_summary_data(data):
+        data.to_excel("7_summary_usa_covid+vaccination_data.xlsx", index=False, engine='openpyxl')
+        print("Summary USA COVID-19 and vaccination data has been saved to 7_summary_usa_covid+vaccination_data.xlsx")
+
+    save_to_excel_summary_data(summary_data_df)
+
+    # Print summary data
+    print(summary_data_df.head())
+
+# Execute merge_and_summarize_data function
+merge_and_summarize_data("6_merged_usa_covid+vaccination_data.xlsx")
